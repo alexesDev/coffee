@@ -1,38 +1,5 @@
-class Vector2
-  constructor: (@x, @y) ->
-
-  # https://en.wikipedia.org/wiki/Rotation_matrix
-  rotate: (angle) ->
-    c = Math.cos(angle)
-    s = Math.sin(angle)
-
-    new Vector2(
-      @x * c - @y * s,
-      @x * s + @y * c
-    )
-
-  translate: (v) -> new Vector2(@x + v.x, @y + v.y)
-  scale: (v) -> new Vector2(@x * v.x, @y * v.y)
-
-class Triangle
-  # равнобедренный треугольник с origin в основании медианы третьей стороны
-  @BASE_POINTS: [
-    new Vector2(-1, 0),
-    new Vector2(1, 0),
-    new Vector2(0, -1),
-  ]
-
-  constructor: (@pos, @scale, @fillStyle) ->
-
-  draw: (ctx, angle) ->
-    points = Triangle.BASE_POINTS.map((v) => v.scale(@scale).rotate(angle).translate(@pos))
-
-    ctx.fillStyle = @fillStyle
-    ctx.beginPath()
-    ctx.moveTo(points[0].x, points[0].y)
-    ctx.lineTo(points[1].x, points[1].y)
-    ctx.lineTo(points[2].x, points[2].y)
-    ctx.fill()
+import { Vector2 } from './Vector2'
+import { Star } from './Star'
 
 buildCanvas = (size) ->
   el = document.createElement('canvas')
@@ -52,15 +19,16 @@ container = document.getElementById('app')
 container.appendChild(bigCanvas.el)
 container.appendChild(smallCanvas.el)
 
-t = new Triangle(new Vector2(100, 100), new Vector2(10, 50))
-angle = 0
+colors = [[0, 50], [240, 30], [120, 30], [60, 30], [0, 0]]
+stars = (new Star(5, new Vector2(100 + i * 100, 100), hue, lightness) for [hue, lightness], i in colors)
 
-animate = () ->
-  bigCanvas.ctx.clearRect(0, 0, bigCanvas.el.width, bigCanvas.el.height)
-  count = 5
-  step = Math.PI * 2 / count
-  t.draw(bigCanvas.ctx, i * step + angle) for i in [0..count]
-  angle += 0.05
-  requestAnimationFrame animate
+bigCanvas.ctx.clearRect(0, 0, bigCanvas.el.width, bigCanvas.el.height)
+stars.forEach (s) -> s.draw(bigCanvas.ctx)
 
-requestAnimationFrame animate
+bigCanvas.el.addEventListener 'mousedown', (e) ->
+  rect = bigCanvas.el.getBoundingClientRect()
+  mousePos = new Vector2(e.clientX - rect.left, e.clientY - rect.top)
+  s = stars.find (s) -> s.isInside(mousePos)
+
+  smallCanvas.ctx.fillStyle = if s then s.getFillColor() else 'white'
+  smallCanvas.ctx.fillRect(0, 0, smallCanvas.el.width, smallCanvas.el.height)

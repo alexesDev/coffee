@@ -14,6 +14,9 @@ const transformCS = {
 
 export default defineConfig({
   plugins: [transformCS],
+  resolve: {
+    extensions: ['.js', '.coffee'],
+  },
   build: {
     rollupOptions: {
       input: {
