@@ -22,7 +22,6 @@ container.appendChild(smallCanvas.el)
 colors = [[0, 50], [240, 30], [120, 30], [60, 30], [0, 0]]
 stars = (new Star(5, new Vector2(100 + i * 100, 100), hue, lightness) for [hue, lightness], i in colors)
 
-bigCanvas.ctx.clearRect(0, 0, bigCanvas.el.width, bigCanvas.el.height)
 stars.forEach (s) -> s.draw(bigCanvas.ctx)
 
 bigCanvas.el.addEventListener 'mousedown', (e) ->
