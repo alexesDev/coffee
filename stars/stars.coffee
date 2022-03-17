@@ -1,16 +1,37 @@
 class Vector2
   constructor: (@x, @y) ->
 
-class Triangle
-  constructor: (@pos, @size, @fillStyle) ->
+  # https://en.wikipedia.org/wiki/Rotation_matrix
+  rotate: (angle) ->
+    c = Math.cos(angle)
+    s = Math.sin(angle)
 
-  draw: (ctx, matrix) ->
+    new Vector2(
+      @x * c - @y * s,
+      @x * s + @y * c
+    )
+
+  translate: (v) -> new Vector2(@x + v.x, @y + v.y)
+  scale: (v) -> new Vector2(@x * v.x, @y * v.y)
+
+class Triangle
+  # равнобедренный треугольник с origin в основании медианы третьей стороны
+  @BASE_POINTS: [
+    new Vector2(-1, 0),
+    new Vector2(1, 0),
+    new Vector2(0, -1),
+  ]
+
+  constructor: (@pos, @scale, @fillStyle) ->
+
+  draw: (ctx, angle) ->
+    points = Triangle.BASE_POINTS.map((v) => v.scale(@scale).rotate(angle).translate(@pos))
+
     ctx.fillStyle = @fillStyle
     ctx.beginPath()
-    # равнобедренный треугольник с origin в основании медианы третьей стороны
-    ctx.moveTo(@pos.x - @size.x / 2, @pos.y + @size.y)
-    ctx.lineTo(@pos.x + @size.x / 2, @pos.y + @size.y)
-    ctx.lineTo(@pos.x, @pos.y - @size.y)
+    ctx.moveTo(points[0].x, points[0].y)
+    ctx.lineTo(points[1].x, points[1].y)
+    ctx.lineTo(points[2].x, points[2].y)
     ctx.fill()
 
 buildCanvas = (size) ->
@@ -18,6 +39,8 @@ buildCanvas = (size) ->
   el.width = size.x
   el.height = size.y
   el.style.border = '1px solid #ccc'
+  el.style.display = 'block'
+  el.style.margin = '10px'
 
   el: el
   ctx: el.getContext('2d')
@@ -29,5 +52,12 @@ container = document.getElementById('app')
 container.appendChild(bigCanvas.el)
 container.appendChild(smallCanvas.el)
 
-t = new Triangle(new Vector2(100, 100), new Vector2(20, 50))
-t.draw(bigCanvas.ctx)
+t = new Triangle(new Vector2(100, 100), new Vector2(10, 50))
+angle = 0
+
+animate = () ->
+  bigCanvas.ctx.clearRect(0, 0, bigCanvas.el.width, bigCanvas.el.height)
+  t.draw(bigCanvas.ctx, angle += 0.1)
+  requestAnimationFrame animate
+
+requestAnimationFrame animate

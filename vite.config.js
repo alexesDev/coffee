@@ -5,7 +5,6 @@ import CoffeeScript from 'coffeescript';
 const transformCS = {
   name: 'coffee',
   transform: (src, id) => {
-    console.log(id);
     if (id.endsWith('.coffee')) {
       const { js, sourceMap } = CoffeeScript.compile(src, { sourceMap: 'on' });
       return { code: js, sourceMap };
