@@ -57,7 +57,10 @@ angle = 0
 
 animate = () ->
   bigCanvas.ctx.clearRect(0, 0, bigCanvas.el.width, bigCanvas.el.height)
-  t.draw(bigCanvas.ctx, angle += 0.1)
+  count = 5
+  step = Math.PI * 2 / count
+  t.draw(bigCanvas.ctx, i * step + angle) for i in [0..count]
+  angle += 0.05
   requestAnimationFrame animate
 
 requestAnimationFrame animate
